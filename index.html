@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Darks Guide To WCAG — Interactive WCAG 2.2 Reference</title>
+<meta name="description" content="Darks Guide To WCAG: an interactive, sector-aware WCAG 2.2 accessibility reference, checklist and colour contrast tool.">
+<style>
+:root {
+  --bg:#f5f7fb; --panel:#ffffff; --text:#172033; --muted:#536179; --border:#cbd5e1;
+  --accent:#263b80; --accent2:#0b6b59; --danger:#9b1c1c; --focus:#ffbf47; --soft:#eef3ff;
+  --radius:18px; --shadow:0 10px 30px rgba(23,32,51,.08);
+}
+@media (prefers-color-scheme: dark) {
+ :root { --bg:#0d1320; --panel:#151e2f; --text:#f6f7fb; --muted:#b9c4d6; --border:#41506b;
+ --accent:#a9baff; --accent2:#7ce0c8; --danger:#ff9f9f; --focus:#ffd166; --soft:#1d2a43; --shadow:none; }
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce) { html {scroll-behavior:auto} *,*::before,*::after {animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important} }
+body { margin:0; font:17px/1.58 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
+a { color:var(--accent); text-underline-offset:.18em; }
+a:hover { text-decoration-thickness:.15em; }
+:focus-visible { outline:4px solid var(--focus); outline-offset:3px; border-radius:4px; }
+.skip { position:absolute; left:1rem; top:-5rem; z-index:1000; background:#000; color:#fff; padding:.8rem 1rem; }
+.skip:focus { top:1rem; }
+header { background:linear-gradient(135deg,#111a31,#243b78); color:#fff; padding:3rem 1.2rem 2.3rem; }
+.wrap { width:min(1180px, calc(100% - 2rem)); margin-inline:auto; }
+.eyebrow { text-transform:uppercase; font-weight:800; letter-spacing:.09em; font-size:.78rem; opacity:.82; }
+h1 { font-size:clamp(2.4rem,8vw,5.8rem); line-height:.95; margin:.35rem 0 1rem; letter-spacing:-.055em; max-width:950px; }
+h2 { font-size:clamp(1.7rem,4vw,2.5rem); line-height:1.12; margin:0 0 .75rem; }
+h3 { line-height:1.2; }
+.lead { font-size:1.2rem; max-width:820px; color:#eef3ff; }
+.hero-grid { display:grid; grid-template-columns:1.3fr .7fr; gap:1rem; margin-top:1.4rem; }
+.hero-card { background:rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.25); border-radius:var(--radius); padding:1rem; }
+.hero-card strong { display:block; font-size:1.45rem; }
+nav.sticky { position:sticky; top:0; z-index:50; background:color-mix(in srgb,var(--panel) 94%, transparent); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+nav.sticky .wrap { display:flex; gap:.3rem; overflow:auto; padding:.6rem 0; }
+nav.sticky a { flex:0 0 auto; padding:.55rem .75rem; border-radius:999px; text-decoration:none; font-weight:700; }
+nav.sticky a:hover { background:var(--soft); }
+main { padding:1.5rem 0 4rem; }
+section { scroll-margin-top:5rem; margin:1.2rem 0; }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:clamp(1rem,3vw,1.5rem); }
+.grid { display:grid; grid-template-columns:repeat(12,1fr); gap:1rem; }
+.span-6 { grid-column:span 6; } .span-4 {grid-column:span 4} .span-8 {grid-column:span 8} .span-12 {grid-column:span 12}
+.pour { display:grid; grid-template-columns:repeat(4,1fr); gap:.7rem; margin-top:1rem; }
+.pour div { border:1px solid var(--border); border-radius:14px; padding:.9rem; }
+.pour b { display:block; font-size:1.08rem; }
+label { font-weight:750; }
+select,input[type="search"],input[type="text"],button { font:inherit; }
+select,input[type="search"],input[type="text"] { width:100%; padding:.75rem; color:var(--text); background:var(--panel); border:1px solid var(--border); border-radius:10px; }
+button,.button { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:10px; padding:.7rem .85rem; font-weight:800; cursor:pointer; }
+button.primary { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+@media (prefers-color-scheme: light) { button.primary { color:white; } }
+button:hover { filter:brightness(.96); }
+.sector-tabs { display:flex; gap:.55rem; flex-wrap:wrap; margin:.9rem 0; }
+.sector-tabs button[aria-pressed="true"] { background:var(--accent); color:white; border-color:var(--accent); }
+#sectorLegal { border-left:5px solid var(--accent2); padding-left:1rem; }
+.notice { border-left:5px solid var(--focus); background:var(--soft); padding:.9rem 1rem; border-radius:8px; }
+.tools { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.contrast-preview { min-height:120px; display:grid; place-items:center; text-align:center; font-size:1.25rem; font-weight:800; border-radius:12px; border:1px solid var(--border); padding:1rem; }
+.colour-row { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
+.result { margin-top:.8rem; padding:.9rem; border:1px solid var(--border); border-radius:12px; }
+.result strong { font-size:1.35rem; }
+.filters { display:grid; grid-template-columns:2fr repeat(3,1fr); gap:.7rem; margin:1rem 0; }
+.criteria-toolbar { display:flex; justify-content:space-between; gap:.8rem; flex-wrap:wrap; align-items:center; }
+#criteriaList { display:grid; gap:.75rem; }
+.criterion { border:1px solid var(--border); border-radius:14px; background:var(--panel); overflow:hidden; }
+.criterion summary { list-style:none; cursor:pointer; padding:1rem; display:grid; grid-template-columns:auto 1fr auto; gap:.8rem; align-items:start; }
+.criterion summary::-webkit-details-marker {display:none}
+.criterion summary::before { content:"+"; font-weight:900; font-size:1.25rem; width:1.4rem; text-align:center; }
+.criterion[open] summary::before { content:"−"; }
+.criterion-body { padding:0 1rem 1rem 3.2rem; }
+.badges { display:flex; gap:.35rem; flex-wrap:wrap; margin-top:.35rem; }
+.badge { display:inline-flex; align-items:center; border:1px solid var(--border); border-radius:999px; padding:.15rem .55rem; font-size:.78rem; font-weight:800; }
+.badge.priority { border-color:var(--accent2); background:color-mix(in srgb,var(--accent2) 12%,var(--panel)); }
+.checkline { display:flex; gap:.6rem; align-items:flex-start; padding:.75rem; border-top:1px solid var(--border); }
+.checkline input { width:1.3rem; height:1.3rem; margin-top:.15rem; }
+.progress { height:14px; background:var(--soft); border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+.progress > div { height:100%; width:0; background:var(--accent2); transition:width .2s ease; }
+.muted { color:var(--muted); }
+.small { font-size:.9rem; }
+.quicktests { display:grid; grid-template-columns:repeat(3,1fr); gap:.7rem; }
+.quicktests article { border:1px solid var(--border); border-radius:14px; padding:.9rem; }
+.quicktests code { white-space:normal; }
+table { width:100%; border-collapse:collapse; }
+th,td { text-align:left; vertical-align:top; padding:.7rem; border-bottom:1px solid var(--border); }
+th { background:var(--soft); }
+footer { border-top:1px solid var(--border); padding:2rem 0 4rem; color:var(--muted); }
+ul.checks { padding-left:1.2rem; }
+.kbd { font-family:ui-monospace,monospace; border:1px solid var(--border); border-bottom-width:3px; padding:.1rem .35rem; border-radius:5px; background:var(--panel); }
+.visually-hidden { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+@media (max-width:800px) {
+ .hero-grid,.tools {grid-template-columns:1fr} .pour {grid-template-columns:1fr 1fr}
+ .span-4,.span-6,.span-8 {grid-column:span 12} .filters {grid-template-columns:1fr 1fr}
+ .filters .searchwide {grid-column:1/-1} .quicktests {grid-template-columns:1fr}
+}
+@media (max-width:520px) { .pour,.filters,.colour-row {grid-template-columns:1fr} .criterion summary {grid-template-columns:auto 1fr} .criterion summary > .level-right {grid-column:2} }
+@media print {
+ nav.sticky,.sector-tabs,.filters,.contrast-controls,.no-print {display:none!important}
+ body {background:white;color:black;font-size:11pt} .panel,.criterion {box-shadow:none;break-inside:avoid;border-color:#999}
+ .criterion:not([open]) .criterion-body {display:block} a {color:black}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header>
+<div class="wrap">
+<div class="eyebrow">WCAG 2.2 · practical reference · sector aware</div>
+<h1>Darks Guide To WCAG</h1>
+<p class="lead">A single-page accessibility field guide: understand the standard, switch sector context, check colour contrast, work through all 86 WCAG 2.2 success criteria, and keep a local audit checklist.</p>
+<div class="hero-grid">
+<div class="hero-card"><strong>POUR</strong>Perceivable · Operable · Understandable · Robust</div>
+<div class="hero-card"><strong>Target</strong>AA is the common organisational baseline; AAA is additional enhancement, not normally a whole-site policy target.</div>
+</div>
+</div>
+</header>
+
+<nav class="sticky" aria-label="Guide sections">
+<div class="wrap">
+<a href="#sector">Sector</a><a href="#basics">Basics</a><a href="#contrast">Contrast lab</a><a href="#quick-tests">Quick tests</a><a href="#criteria">All criteria</a><a href="#documents">Documents</a><a href="#testing">Testing</a><a href="#sources">Sources</a>
+</div>
+</nav>
+
+<main id="main" class="wrap">
+<section id="sector" class="panel">
+<div class="eyebrow">Choose your context</div>
+<h2>Sector lens</h2>
+<p>Every WCAG success criterion remains in the guide. The sector toggle changes the examples, risk emphasis and legal context, and marks especially relevant criteria as <span class="badge priority">Sector priority</span>.</p>
+<div class="sector-tabs" id="sectorTabs" aria-label="Select sector"></div>
+<h3 id="sectorTitle">All sectors</h3>
+<p id="sectorStrap"></p>
+<p id="sectorLegal"></p>
+<ul id="sectorTips" class="checks"></ul>
+</section>
+
+<section id="basics" class="panel">
+<div class="eyebrow">Start here</div><h2>What WCAG is</h2>
+<p><strong>WCAG 2.2</strong> is the W3C's current WCAG 2 Recommendation. It organises accessibility into 13 guidelines under four principles and uses testable success criteria at levels A, AA and AAA. WCAG 2.2 adds nine success criteria over 2.1 and removes obsolete criterion 4.1.1 Parsing.</p>
+<div class="pour" aria-label="The four WCAG principles">
+<div><b>1 · Perceivable</b>People can get the information through senses and formats available to them.</div>
+<div><b>2 · Operable</b>People can navigate and use controls with the input methods available to them.</div>
+<div><b>3 · Understandable</b>Content and interactions are readable, predictable and forgiving.</div>
+<div><b>4 · Robust</b>Code communicates reliably with browsers and assistive technologies.</div>
+</div>
+<p class="notice"><strong>Important:</strong> passing an automated scanner is not WCAG conformance. Many criteria require human judgement, keyboard testing, zoom/reflow testing and assistive-technology checks.</p>
+</section>
+
+<section id="contrast" class="panel">
+<div class="eyebrow">Interactive tool</div><h2>Colour contrast lab</h2>
+<div class="tools">
+<div class="contrast-controls">
+<div class="colour-row">
+<div><label for="fg">Text colour</label><input id="fg" type="text" value="#172033" inputmode="text"></div>
+<div><label for="bg">Background</label><input id="bg" type="text" value="#ffffff" inputmode="text"></div>
+</div>
+<p class="small muted">Enter 3- or 6-digit hex colours, for example <code>#172033</code>.</p>
+<div id="contrastResult" class="result" aria-live="polite"></div>
+</div>
+<div id="contrastPreview" class="contrast-preview">Readable text should not depend on perfect eyesight or perfect lighting.</div>
+</div>
+<p><strong>WCAG AA text:</strong> 4.5:1 for normal text; 3:1 for large text. <strong>AAA:</strong> 7:1 normal; 4.5:1 large. Important non-text controls and graphical objects generally need 3:1 under 1.4.11. WCAG has defined exceptions, so use the formal criterion for edge cases.</p>
+</section>
+
+<section id="quick-tests" class="panel">
+<div class="eyebrow">Five-minute reality check</div><h2>Quick manual tests</h2>
+<div class="quicktests">
+<article><h3>⌨ Keyboard</h3><p>Put the mouse away. Use <span class="kbd">Tab</span>, <span class="kbd">Shift</span>+<span class="kbd">Tab</span>, arrows, <span class="kbd">Enter</span>, <span class="kbd">Space</span> and <span class="kbd">Esc</span>. You should reach, see and operate everything in a sensible order.</p></article>
+<article><h3>🔎 Zoom & reflow</h3><p>Zoom to 200%, then test a narrow viewport / 400% equivalent. Content should remain readable and usable without losing controls or forcing horizontal-and-vertical scrolling for ordinary content.</p></article>
+<article><h3>🎨 Remove colour</h3><p>Imagine the page in greyscale. Errors, selected states, charts and links must still make sense without colour being the only signal.</p></article>
+<article><h3>🧭 Structure</h3><p>Check the page title, one logical heading hierarchy, landmarks, labels and meaningful link text. Visual size alone is not semantic structure.</p></article>
+<article><h3>📝 Forms</h3><p>Every field needs a persistent accessible label. Trigger errors: the message should identify the problem, suggest a fix when known, and be announced where appropriate.</p></article>
+<article><h3>🧩 Third parties</h3><p>Test cookie banners, payment widgets, chat, maps, calendars, CAPTCHA, video players and embeds. Your user experiences the whole journey, not just your own code.</p></article>
+</div>
+</section>
+
+<section id="criteria" class="panel">
+<div class="criteria-toolbar">
+<div><div class="eyebrow">Complete checklist</div><h2>All WCAG 2.2 success criteria</h2></div>
+<div><button type="button" id="exportBtn">Export progress JSON</button> <button type="button" id="resetBtn">Reset checks</button></div>
+</div>
+<div class="progress" aria-label="Checklist progress"><div id="progressBar"></div></div>
+<p id="progressText" class="small" aria-live="polite">0 of 86 checked</p>
+<div class="filters">
+<div class="searchwide"><label for="search">Search</label><input id="search" type="search" placeholder="e.g. captions, keyboard, forms, contrast"></div>
+<div><label for="levelFilter">Level</label><select id="levelFilter"><option value="all">A + AA + AAA</option><option>A</option><option>AA</option><option>AAA</option></select></div>
+<div><label for="principleFilter">Principle</label><select id="principleFilter"><option value="all">All principles</option><option>Perceivable</option><option>Operable</option><option>Understandable</option><option>Robust</option></select></div>
+<div><label for="statusFilter">Checklist</label><select id="statusFilter"><option value="all">All</option><option value="todo">Not checked</option><option value="done">Checked</option></select></div>
+</div>
+<div id="criteriaCount" class="small muted"></div>
+<div id="criteriaList"></div>
+</section>
+
+<section id="documents" class="panel">
+<div class="eyebrow">Often forgotten</div><h2>Documents, PDFs and content</h2>
+<div class="grid">
+<div class="span-6">
+<h3>Accessible documents</h3>
+<ul class="checks">
+<li>Prefer an accessible HTML page when it can provide the same information.</li>
+<li>Use real headings, lists and table headers; do not fake structure with font size or bold text.</li>
+<li>Set document language and a meaningful title.</li>
+<li>Add useful alt text to informative images and mark decorative images appropriately.</li>
+<li>Make link text meaningful and check reading/tag order in exported PDFs.</li>
+<li>Ensure form fields, if present, have labels, logical tab order and clear instructions.</li>
+<li>Check colour contrast and never rely on colour alone.</li>
+</ul>
+</div>
+<div class="span-6">
+<h3>Editorial workflow</h3>
+<ul class="checks">
+<li>Write descriptive headings and concise link text.</li>
+<li>Caption video; provide transcripts or audio description where the relevant criteria require them.</li>
+<li>Describe charts in text, including the conclusion the chart is meant to communicate.</li>
+<li>Avoid all-caps blocks, dense walls of text and unexplained jargon where simpler wording is possible.</li>
+<li>Check social graphics: essential words embedded in images need an accessible equivalent.</li>
+<li>Ask suppliers for accessibility evidence before buying a platform or widget.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section id="testing" class="panel">
+<div class="eyebrow">Do more than scan</div><h2>A practical testing stack</h2>
+<table>
+<thead><tr><th>Layer</th><th>What to do</th><th>Finds</th></tr></thead>
+<tbody>
+<tr><td>Automated</td><td>Run axe, Lighthouse or another rules engine during development and CI.</td><td>Some markup, names, contrast and structural failures.</td></tr>
+<tr><td>Keyboard</td><td>Complete real tasks without a mouse.</td><td>Focus order, traps, invisible focus, inaccessible custom controls.</td></tr>
+<tr><td>Zoom / reflow</td><td>Test 200% text zoom and narrow/400%-equivalent layouts.</td><td>Clipping, overlap, hidden controls, two-dimensional scrolling.</td></tr>
+<tr><td>Screen reader</td><td>Test representative tasks with platform-appropriate assistive technology.</td><td>Names, roles, states, announcements, heading/landmark structure.</td></tr>
+<tr><td>Content review</td><td>Review alt text, labels, instructions, errors, links, captions and language.</td><td>Meaning and clarity problems automation cannot judge.</td></tr>
+<tr><td>User testing</td><td>Include disabled people in research and task testing.</td><td>Real barriers, workarounds and cumulative usability failures.</td></tr>
+</tbody>
+</table>
+<h3>Definition of done</h3>
+<p>A feature is not done because it “looks accessible”. Include accessibility acceptance criteria, test the full journey, record known issues, assign owners and retest fixes. Recheck after design-system, CMS, payment, cookie, chat or other supplier changes.</p>
+</section>
+
+<section id="sources" class="panel">
+<div class="eyebrow">Primary references</div><h2>Sources and legal context</h2>
+<ul>
+<li><a href="https://www.w3.org/TR/WCAG22/">W3C — Web Content Accessibility Guidelines (WCAG) 2.2</a></li>
+<li><a href="https://www.w3.org/WAI/WCAG22/quickref/">W3C — How to Meet WCAG 2.2 Quick Reference</a></li>
+<li><a href="https://www.w3.org/WAI/standards-guidelines/wcag/">W3C — WCAG overview</a></li>
+<li><a href="https://www.gov.uk/guidance/accessibility-requirements-for-public-sector-websites-and-apps">GOV.UK — accessibility requirements for public-sector websites and apps</a></li>
+<li><a href="https://www.gov.uk/guidance/make-your-website-or-app-accessible-and-publish-an-accessibility-statement">GOV.UK — make your website or app accessible and publish an accessibility statement</a></li>
+<li><a href="https://www.gov.uk/government/publications/equality-act-guidance/disability-quick-start-guide-for-service-providers-html">GOV.UK — Equality Act disability guide for service providers</a></li>
+</ul>
+<p class="small muted">This guide is an educational implementation resource, not legal advice. For conformance decisions, use the normative W3C standard; for legal obligations, check the law that applies to your organisation and service.</p>
+</section>
+</main>
+
+<footer><div class="wrap"><strong>Darks Guide To WCAG</strong><br>Self-contained static HTML. Checklist progress is stored only in this browser using localStorage.</div></footer>
+
+<script>
+const criteria = [{"id": "1.1.1", "title": "Non-text Content", "level": "A", "principle": "Perceivable", "guideline": "1.1 Text Alternatives", "summary": "Give meaningful images, icons and other non-text content an equivalent text alternative; mark decoration so assistive technology can ignore it.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-content"}, {"id": "1.2.1", "title": "Audio-only and Video-only (Prerecorded)", "level": "A", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide an equivalent alternative for prerecorded audio-only or video-only material.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-only-and-video-only-prerecorded"}, {"id": "1.2.2", "title": "Captions (Prerecorded)", "level": "A", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Caption prerecorded synchronized video with spoken information and meaningful sounds.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/captions-prerecorded"}, {"id": "1.2.3", "title": "Audio Description or Media Alternative (Prerecorded)", "level": "A", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide audio description or an equivalent text-based media alternative for relevant prerecorded video information.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-description-or-media-alternative-prerecorded"}, {"id": "1.2.4", "title": "Captions (Live)", "level": "AA", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide captions for live synchronized audio and video.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/captions-live"}, {"id": "1.2.5", "title": "Audio Description (Prerecorded)", "level": "AA", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide audio description for important visual information in prerecorded synchronized video.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-description-prerecorded"}, {"id": "1.2.6", "title": "Sign Language (Prerecorded)", "level": "AAA", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide sign-language interpretation for prerecorded synchronized audio content.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/sign-language-prerecorded"}, {"id": "1.2.7", "title": "Extended Audio Description (Prerecorded)", "level": "AAA", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Where normal pauses are not enough, provide an extended version that makes room for the necessary audio description.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/extended-audio-description-prerecorded"}, {"id": "1.2.8", "title": "Media Alternative (Prerecorded)", "level": "AAA", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide a complete text alternative for prerecorded synchronized media and prerecorded video-only media.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/media-alternative-prerecorded"}, {"id": "1.2.9", "title": "Audio-only (Live)", "level": "AAA", "principle": "Perceivable", "guideline": "1.2 Time-based Media", "summary": "Provide a text alternative that communicates equivalent information for live audio-only content.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-only-live"}, {"id": "1.3.1", "title": "Info and Relationships", "level": "A", "principle": "Perceivable", "guideline": "1.3 Adaptable", "summary": "Use real headings, labels, lists, tables and other semantics so structure and relationships are available programmatically.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships"}, {"id": "1.3.2", "title": "Meaningful Sequence", "level": "A", "principle": "Perceivable", "guideline": "1.3 Adaptable", "summary": "Make sure the programmatic reading order preserves meaning when sequence matters.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/meaningful-sequence"}, {"id": "1.3.3", "title": "Sensory Characteristics", "level": "A", "principle": "Perceivable", "guideline": "1.3 Adaptable", "summary": "Do not give instructions that depend only on shape, size, position, direction or sound.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/sensory-characteristics"}, {"id": "1.3.4", "title": "Orientation", "level": "AA", "principle": "Perceivable", "guideline": "1.3 Adaptable", "summary": "Allow content to work in portrait and landscape unless one orientation is genuinely essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/orientation"}, {"id": "1.3.5", "title": "Identify Input Purpose", "level": "AA", "principle": "Perceivable", "guideline": "1.3 Adaptable", "summary": "Use supported autocomplete and semantics so common personal-data fields expose their purpose.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/identify-input-purpose"}, {"id": "1.3.6", "title": "Identify Purpose", "level": "AAA", "principle": "Perceivable", "guideline": "1.3 Adaptable", "summary": "Expose the purpose of interface components, icons and regions programmatically where markup allows it.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/identify-purpose"}, {"id": "1.4.1", "title": "Use of Color", "level": "A", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Do not use colour as the only way to communicate meaning, status, required fields or errors.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/use-of-color"}, {"id": "1.4.2", "title": "Audio Control", "level": "A", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Give users a way to stop, pause or independently control audio that starts automatically and continues for more than three seconds.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-control"}, {"id": "1.4.3", "title": "Contrast (Minimum)", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Provide at least 4.5:1 contrast for normal text and 3:1 for large text, subject to WCAG exceptions.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum"}, {"id": "1.4.4", "title": "Resize Text", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Text must remain usable when resized up to 200% without requiring assistive technology.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/resize-text"}, {"id": "1.4.5", "title": "Images of Text", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Use real text instead of images of text when the same visual presentation can reasonably be achieved with text.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/images-of-text"}, {"id": "1.4.6", "title": "Contrast (Enhanced)", "level": "AAA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Aim for at least 7:1 contrast for normal text and 4.5:1 for large text, subject to WCAG exceptions.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced"}, {"id": "1.4.7", "title": "Low or No Background Audio", "level": "AAA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Make speech in prerecorded audio easy to hear by avoiding or reducing competing background sound.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/low-or-no-background-audio"}, {"id": "1.4.8", "title": "Visual Presentation", "level": "AAA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Offer highly readable presentation options for blocks of text, including manageable width, spacing, alignment and user-selected colours.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation"}, {"id": "1.4.9", "title": "Images of Text (No Exception)", "level": "AAA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Use text rather than images of text except where the image is essential or purely decorative.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/images-of-text-no-exception"}, {"id": "1.4.10", "title": "Reflow", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "At 400% zoom / narrow viewport, content should reflow without two-dimensional scrolling except where a two-dimensional layout is essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/reflow"}, {"id": "1.4.11", "title": "Non-text Contrast", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Important interface controls, states and meaningful graphics need at least 3:1 contrast against adjacent colours.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast"}, {"id": "1.4.12", "title": "Text Spacing", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Content must still work when users increase line, paragraph, letter and word spacing to WCAG test values.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/text-spacing"}, {"id": "1.4.13", "title": "Content on Hover or Focus", "level": "AA", "principle": "Perceivable", "guideline": "1.4 Distinguishable", "summary": "Extra content triggered by hover or keyboard focus should be dismissible, hoverable where appropriate, and persistent long enough to use.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus"}, {"id": "2.1.1", "title": "Keyboard", "level": "A", "principle": "Operable", "guideline": "2.1 Keyboard Accessible", "summary": "Make all functionality operable from a keyboard where the task does not inherently require path-dependent input.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/keyboard"}, {"id": "2.1.2", "title": "No Keyboard Trap", "level": "A", "principle": "Operable", "guideline": "2.1 Keyboard Accessible", "summary": "Users must be able to move keyboard focus into and back out of every component.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap"}, {"id": "2.1.3", "title": "Keyboard (No Exception)", "level": "AAA", "principle": "Operable", "guideline": "2.1 Keyboard Accessible", "summary": "Make all functionality keyboard operable without relying on exceptions for path-dependent input.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/keyboard-no-exception"}, {"id": "2.1.4", "title": "Character Key Shortcuts", "level": "A", "principle": "Operable", "guideline": "2.1 Keyboard Accessible", "summary": "If a single printable character triggers a shortcut, let users turn it off, remap it or ensure it only works while the relevant component has focus.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/character-key-shortcuts"}, {"id": "2.2.1", "title": "Timing Adjustable", "level": "A", "principle": "Operable", "guideline": "2.2 Enough Time", "summary": "Let users turn off, extend or adjust time limits unless the timing is genuinely essential or otherwise exempt.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/timing-adjustable"}, {"id": "2.2.2", "title": "Pause, Stop, Hide", "level": "A", "principle": "Operable", "guideline": "2.2 Enough Time", "summary": "Give users control over moving, blinking, scrolling or auto-updating information when required by the criterion.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide"}, {"id": "2.2.3", "title": "No Timing", "level": "AAA", "principle": "Operable", "guideline": "2.2 Enough Time", "summary": "Avoid time limits unless they are essential or relate to real-time events.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/no-timing"}, {"id": "2.2.4", "title": "Interruptions", "level": "AAA", "principle": "Operable", "guideline": "2.2 Enough Time", "summary": "Allow users to postpone or suppress interruptions except in an emergency.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/interruptions"}, {"id": "2.2.5", "title": "Re-authenticating", "level": "AAA", "principle": "Operable", "guideline": "2.2 Enough Time", "summary": "After authentication expires, preserve the user's data so they can continue after signing in again.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/re-authenticating"}, {"id": "2.2.6", "title": "Timeouts", "level": "AAA", "principle": "Operable", "guideline": "2.2 Enough Time", "summary": "Warn users about inactivity timeouts that could cause data loss unless data is preserved for a long period.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/timeouts"}, {"id": "2.3.1", "title": "Three Flashes or Below Threshold", "level": "A", "principle": "Operable", "guideline": "2.3 Seizures and Physical Reactions", "summary": "Do not include content that flashes more than three times in one second unless it stays below the defined flash thresholds.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold"}, {"id": "2.3.2", "title": "Three Flashes", "level": "AAA", "principle": "Operable", "guideline": "2.3 Seizures and Physical Reactions", "summary": "Do not include any content that flashes more than three times in one second.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/three-flashes"}, {"id": "2.3.3", "title": "Animation from Interactions", "level": "AAA", "principle": "Operable", "guideline": "2.3 Seizures and Physical Reactions", "summary": "Allow motion animation triggered by interaction to be disabled unless the animation is essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions"}, {"id": "2.4.1", "title": "Bypass Blocks", "level": "A", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Provide a way to skip repeated blocks, such as a skip link or appropriate landmarks.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/bypass-blocks"}, {"id": "2.4.2", "title": "Page Titled", "level": "A", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Give each page a descriptive title that identifies its topic or purpose.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/page-titled"}, {"id": "2.4.3", "title": "Focus Order", "level": "A", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Keyboard focus should move in an order that preserves meaning and operability.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-order"}, {"id": "2.4.4", "title": "Link Purpose (In Context)", "level": "A", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Make the purpose of each link understandable from its text or its programmatically associated context.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context"}, {"id": "2.4.5", "title": "Multiple Ways", "level": "AA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Provide more than one way to find pages in a set, except where a page is part of a process.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/multiple-ways"}, {"id": "2.4.6", "title": "Headings and Labels", "level": "AA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Use headings and labels that clearly describe their topic or purpose.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels"}, {"id": "2.4.7", "title": "Focus Visible", "level": "AA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Keyboard users must be able to see which element currently has focus.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible"}, {"id": "2.4.8", "title": "Location", "level": "AAA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Give users information about where they are within a set of pages.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/location"}, {"id": "2.4.9", "title": "Link Purpose (Link Only)", "level": "AAA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Make each link's purpose understandable from the link text alone, except where purpose would be ambiguous to everyone.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-link-only"}, {"id": "2.4.10", "title": "Section Headings", "level": "AAA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Use section headings to organise content.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/section-headings"}, {"id": "2.4.11", "title": "Focus Not Obscured (Minimum)", "level": "AA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "When an element receives keyboard focus, it must not be entirely hidden by author-created content such as sticky headers or overlays.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum"}, {"id": "2.4.12", "title": "Focus Not Obscured (Enhanced)", "level": "AAA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "When an element receives keyboard focus, no part of its focus indicator should be hidden by author-created content.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-enhanced"}, {"id": "2.4.13", "title": "Focus Appearance", "level": "AAA", "principle": "Operable", "guideline": "2.4 Navigable", "summary": "Provide a sufficiently large and contrasting visible focus indicator, meeting WCAG's defined size and contrast requirements.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance"}, {"id": "2.5.1", "title": "Pointer Gestures", "level": "A", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Provide a single-pointer alternative to multipoint or path-based gestures unless the gesture itself is essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures"}, {"id": "2.5.2", "title": "Pointer Cancellation", "level": "A", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Avoid firing important actions on pointer-down; allow cancellation, reversal or another safeguard where applicable.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/pointer-cancellation"}, {"id": "2.5.3", "title": "Label in Name", "level": "A", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "For controls with visible text labels, include that visible wording in the accessible name so voice-control users can target it.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/label-in-name"}, {"id": "2.5.4", "title": "Motion Actuation", "level": "A", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Provide conventional controls for functions triggered by device or user motion and allow motion activation to be disabled unless essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/motion-actuation"}, {"id": "2.5.5", "title": "Target Size (Enhanced)", "level": "AAA", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Provide pointer targets of at least 44 by 44 CSS pixels unless an exception applies.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-enhanced"}, {"id": "2.5.6", "title": "Concurrent Input Mechanisms", "level": "AAA", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Do not restrict users to one input method when the platform supports other input methods, unless restriction is essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/concurrent-input-mechanisms"}, {"id": "2.5.7", "title": "Dragging Movements", "level": "AA", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Anything that requires dragging must also be achievable without dragging using a single-pointer interaction, unless dragging is essential.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements"}, {"id": "2.5.8", "title": "Target Size (Minimum)", "level": "AA", "principle": "Operable", "guideline": "2.5 Input Modalities", "summary": "Provide pointer targets at least 24 by 24 CSS pixels, or satisfy one of WCAG's spacing or exception conditions.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum"}, {"id": "3.1.1", "title": "Language of Page", "level": "A", "principle": "Understandable", "guideline": "3.1 Readable", "summary": "Identify the default human language of each page in code.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/language-of-page"}, {"id": "3.1.2", "title": "Language of Parts", "level": "AA", "principle": "Understandable", "guideline": "3.1 Readable", "summary": "Identify changes of language within content when pronunciation or interpretation depends on them.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts"}, {"id": "3.1.3", "title": "Unusual Words", "level": "AAA", "principle": "Understandable", "guideline": "3.1 Readable", "summary": "Provide definitions or explanations for unusual, specialised or restricted-use words and phrases.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/unusual-words"}, {"id": "3.1.4", "title": "Abbreviations", "level": "AAA", "principle": "Understandable", "guideline": "3.1 Readable", "summary": "Provide a way to identify the expanded form or meaning of abbreviations.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/abbreviations"}, {"id": "3.1.5", "title": "Reading Level", "level": "AAA", "principle": "Understandable", "guideline": "3.1 Readable", "summary": "When content requires advanced reading ability, provide a simpler version or supplementary explanation.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/reading-level"}, {"id": "3.1.6", "title": "Pronunciation", "level": "AAA", "principle": "Understandable", "guideline": "3.1 Readable", "summary": "Provide pronunciation information where the meaning of words is ambiguous without it.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/pronunciation"}, {"id": "3.2.1", "title": "On Focus", "level": "A", "principle": "Understandable", "guideline": "3.2 Predictable", "summary": "Receiving focus alone must not unexpectedly trigger a change of context.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/on-focus"}, {"id": "3.2.2", "title": "On Input", "level": "A", "principle": "Understandable", "guideline": "3.2 Predictable", "summary": "Changing a form control must not unexpectedly change context unless users have been told beforehand.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/on-input"}, {"id": "3.2.3", "title": "Consistent Navigation", "level": "AA", "principle": "Understandable", "guideline": "3.2 Predictable", "summary": "Keep repeated navigation mechanisms in a consistent relative order across a set of pages unless the user changes them.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-navigation"}, {"id": "3.2.4", "title": "Consistent Identification", "level": "AA", "principle": "Understandable", "guideline": "3.2 Predictable", "summary": "Components with the same function should be identified consistently across the site.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-identification"}, {"id": "3.2.5", "title": "Change on Request", "level": "AAA", "principle": "Understandable", "guideline": "3.2 Predictable", "summary": "Only initiate changes of context at the user's request or provide a way to disable automatic changes.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/change-on-request"}, {"id": "3.2.6", "title": "Consistent Help", "level": "A", "principle": "Understandable", "guideline": "3.2 Predictable", "summary": "When help options repeat across pages, keep them in a consistent relative location/order.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-help"}, {"id": "3.3.1", "title": "Error Identification", "level": "A", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "Identify input errors clearly and describe them in text.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-identification"}, {"id": "3.3.2", "title": "Labels or Instructions", "level": "A", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "Provide labels or instructions when users need to enter information.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions"}, {"id": "3.3.3", "title": "Error Suggestion", "level": "AA", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "When an error can be corrected with a known suggestion, provide that suggestion unless doing so would compromise purpose or security.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion"}, {"id": "3.3.4", "title": "Error Prevention (Legal, Financial, Data)", "level": "AA", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "For important legal, financial or data-changing submissions, provide reversal, validation or a review-and-confirm step.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-legal-financial-data"}, {"id": "3.3.5", "title": "Help", "level": "AAA", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "Provide context-sensitive help where appropriate.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/help"}, {"id": "3.3.6", "title": "Error Prevention (All)", "level": "AAA", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "For any submission, provide reversal, validation or review-and-confirm safeguards.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-all"}, {"id": "3.3.7", "title": "Redundant Entry", "level": "A", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "Do not make users re-enter information already supplied in the same process unless necessary; auto-populate or make it selectable where possible.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/redundant-entry"}, {"id": "3.3.8", "title": "Accessible Authentication (Minimum)", "level": "AA", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "Do not require a cognitive-function test in authentication unless an allowed alternative or assistance mechanism is provided.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum"}, {"id": "3.3.9", "title": "Accessible Authentication (Enhanced)", "level": "AAA", "principle": "Understandable", "guideline": "3.3 Input Assistance", "summary": "Avoid cognitive-function authentication tests, with only the narrower WCAG exceptions.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-enhanced"}, {"id": "4.1.2", "title": "Name, Role, Value", "level": "A", "principle": "Robust", "guideline": "4.1 Compatible", "summary": "Expose the name and role of interface components and keep states, properties and values available to assistive technology.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/name-role-value"}, {"id": "4.1.3", "title": "Status Messages", "level": "AA", "principle": "Robust", "guideline": "4.1 Compatible", "summary": "Announce important status messages to assistive technology without forcing focus to move to them.", "url": "https://www.w3.org/WAI/WCAG22/Understanding/status-messages"}];
+const sectors = {"all": {"label": "All sectors", "strap": "The complete WCAG 2.2 reference.", "legal": "WCAG is a technical accessibility standard. Your legal duties depend on jurisdiction, organisation and service.", "priorities": []}, "charity": {"label": "Charity & nonprofit", "strap": "Prioritise donations, membership, events, campaigns, volunteer journeys, PDFs and third-party fundraising tools.", "legal": "In the UK, some charities are directly covered by the Public Sector Bodies Accessibility Regulations; others may be exempt from those regulations, but service providers can still have duties to make reasonable adjustments under equality law.", "priorities": ["1.1.1", "1.3.1", "1.4.1", "1.4.3", "1.4.10", "1.4.11", "2.1.1", "2.4.7", "2.5.8", "3.2.6", "3.3.1", "3.3.2", "3.3.4", "3.3.7", "3.3.8", "4.1.2", "4.1.3"]}, "public": {"label": "Public sector", "strap": "Treat WCAG 2.2 AA, accessible documents and an accessibility statement as core service requirements.", "legal": "UK public-sector websites and mobile apps generally need to meet WCAG 2.2 AA and publish an accessibility statement, subject to the regulations and exemptions.", "priorities": ["1.1.1", "1.2.2", "1.2.4", "1.3.1", "1.3.5", "1.4.3", "1.4.10", "1.4.11", "1.4.12", "2.1.1", "2.4.1", "2.4.7", "2.4.11", "2.5.7", "2.5.8", "3.1.1", "3.2.6", "3.3.1", "3.3.2", "3.3.7", "3.3.8", "4.1.2", "4.1.3"]}, "education": {"label": "Education", "strap": "Focus on learning content, video, documents, assessments, virtual learning environments and complex reading.", "legal": "Education accessibility duties vary by institution and content. UK public-sector education bodies may be covered by the public-sector accessibility rules; schools have specific partial exemptions, so scope should be checked carefully.", "priorities": ["1.1.1", "1.2.2", "1.2.4", "1.2.5", "1.3.1", "1.3.2", "1.4.3", "1.4.10", "2.1.1", "2.2.1", "2.4.6", "2.4.7", "3.1.1", "3.3.1", "3.3.2", "3.3.7", "4.1.2"]}, "health": {"label": "Healthcare", "strap": "Prioritise appointments, medication information, forms, identity, urgent information and low-cognitive-load journeys.", "legal": "Healthcare services often carry heightened practical risk because inaccessible information can block access to care. Public NHS and other public-sector services are generally within UK public-sector accessibility requirements.", "priorities": ["1.1.1", "1.3.1", "1.3.5", "1.4.1", "1.4.3", "1.4.10", "2.1.1", "2.2.1", "2.4.7", "2.4.11", "2.5.8", "3.1.1", "3.2.6", "3.3.1", "3.3.2", "3.3.3", "3.3.4", "3.3.7", "3.3.8", "4.1.3"]}, "commerce": {"label": "Business & e-commerce", "strap": "Concentrate on product discovery, account access, basket, checkout, payments, support and transactional errors.", "legal": "WCAG is not itself a UK statute, but businesses providing services to the public can have equality-law duties to avoid disadvantaging disabled customers and to make reasonable adjustments.", "priorities": ["1.1.1", "1.3.5", "1.4.1", "1.4.3", "1.4.10", "1.4.11", "2.1.1", "2.4.7", "2.5.3", "2.5.7", "2.5.8", "3.2.4", "3.3.1", "3.3.2", "3.3.3", "3.3.4", "3.3.7", "3.3.8", "4.1.2", "4.1.3"]}, "media": {"label": "Content & media", "strap": "Prioritise images, video, audio, live streams, reading experience, embeds and publishing workflows.", "legal": "Legal duties depend on the organisation and service, but accessible publishing reduces exclusion and makes content usable across a wider range of devices and assistive technologies.", "priorities": ["1.1.1", "1.2.1", "1.2.2", "1.2.4", "1.2.5", "1.3.1", "1.4.3", "1.4.4", "1.4.10", "1.4.12", "1.4.13", "2.1.1", "2.4.2", "2.4.6", "2.4.7", "3.1.1", "4.1.2"]}};
+const sectorExtra = {"charity": ["Test the full donation journey, including any embedded payment provider.", "Make downloadable campaign packs, annual reports and grant PDFs accessible.", "Give event and volunteer forms clear labels, errors and confirmation messages.", "Do not allow fundraising urgency timers or pop-ups to trap or pressure keyboard/screen-reader users."], "public": ["Maintain an accessibility statement and update it after audits or major service changes.", "Include PDFs, Word documents, maps, forms, intranets and third-party components in scope where applicable.", "Use manual testing and testing with disabled users, not automated scans alone."], "education": ["Caption teaching video and provide usable alternatives for diagrams and recorded lectures.", "Ensure assessments work with keyboard, zoom and assistive technology and do not create avoidable timing barriers.", "Check learning-platform and third-party tool accessibility before procurement."], "health": ["Never encode urgency, medication status or errors by colour alone.", "Make appointment, triage and prescription journeys resilient to timeouts and errors.", "Use plain language and consistent help; provide accessible alternatives to complex authentication."], "commerce": ["Test search, filters, product variants, basket, checkout and payment confirmation entirely by keyboard.", "Make validation errors specific and preserve entered data.", "Check third-party payment, chat, cookie and review widgets."], "media": ["Build captions, transcripts, alt text and audio description into the editorial workflow.", "Check carousels, infinite scroll, autoplay, embeds and live players with keyboard and screen readers.", "Avoid publishing text baked into images when real HTML text is practical."], "all": ["Start with semantic HTML, keyboard operation and clear content.", "Use automated tools as a safety net, then complete manual and assistive-technology testing.", "Treat accessibility as an ongoing product requirement rather than a one-off audit."]};
+let currentSector = localStorage.getItem("dgw-sector") || "all";
+const checked = new Set(JSON.parse(localStorage.getItem("dgw-checked") || "[]"));
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+function renderSectorTabs() {
+  const box = $("#sectorTabs"); box.innerHTML = "";
+  Object.entries(sectors).forEach(([key, value]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = value.label; b.dataset.sector = key;
+    b.setAttribute("aria-pressed", key === currentSector ? "true" : "false");
+    b.addEventListener("click", () => {
+      currentSector = key; localStorage.setItem("dgw-sector", key);
+      renderSectorTabs(); renderSectorCopy(); renderCriteria();
+    });
+    box.appendChild(b);
+  });
+}
+function renderSectorCopy() {
+  const s = sectors[currentSector];
+  $("#sectorTitle").textContent = s.label;
+  $("#sectorStrap").textContent = s.strap;
+  $("#sectorLegal").textContent = s.legal;
+  $("#sectorTips").innerHTML = (sectorExtra[currentSector] || []).map(x=>`<li>${esc(x)}</li>`).join("");
+}
+function isPriority(id) { return (sectors[currentSector].priorities || []).includes(id); }
+
+function renderCriteria() {
+  const q = $("#search").value.trim().toLowerCase();
+  const lev = $("#levelFilter").value;
+  const pr = $("#principleFilter").value;
+  const status = $("#statusFilter").value;
+  const list = criteria.filter(c => {
+    const hay = `${c.id} ${c.title} ${c.summary} ${c.principle} ${c.guideline}`.toLowerCase();
+    return (!q || hay.includes(q)) && (lev==="all" || c.level===lev) && (pr==="all" || c.principle===pr)
+      && (status==="all" || (status==="done" ? checked.has(c.id) : !checked.has(c.id)));
+  });
+  $("#criteriaCount").textContent = `${list.length} of ${criteria.length} criteria shown`;
+  $("#criteriaList").innerHTML = list.map(c => `
+    <details class="criterion" id="sc-${c.id.replaceAll(".","-")}">
+      <summary>
+        <span aria-hidden="true"></span>
+        <span><strong>${esc(c.id)} · ${esc(c.title)}</strong>
+          <span class="badges"><span class="badge">${esc(c.principle)}</span><span class="badge">Level ${esc(c.level)}</span>${isPriority(c.id)?'<span class="badge priority">Sector priority</span>':''}</span>
+        </span>
+        <span class="level-right small muted">${esc(c.guideline)}</span>
+      </summary>
+      <div class="criterion-body">
+        <p>${esc(c.summary)}</p>
+        <p><a href="${c.url}" target="_blank" rel="noopener">W3C Understanding ${esc(c.id)} <span class="visually-hidden">(opens in a new tab)</span></a></p>
+      </div>
+      <label class="checkline"><input type="checkbox" data-check="${c.id}" ${checked.has(c.id)?"checked":""}> <span><strong>Checked for this project</strong><br><span class="small muted">This is a personal audit marker, not proof of conformance.</span></span></label>
+    </details>`).join("");
+  document.querySelectorAll("[data-check]").forEach(cb => cb.addEventListener("change", e => {
+    const id=e.target.dataset.check; e.target.checked ? checked.add(id) : checked.delete(id);
+    localStorage.setItem("dgw-checked", JSON.stringify([...checked]));
+    updateProgress();
+    if ($("#statusFilter").value !== "all") renderCriteria();
+  }));
+  updateProgress();
+}
+function updateProgress() {
+  const n = checked.size, p = Math.round(n/criteria.length*100);
+  $("#progressBar").style.width = p+"%";
+  $("#progressText").textContent = `${n} of ${criteria.length} checked · ${p}%`;
+}
+
+function hexToRgb(hex) {
+  let h = hex.trim().replace("#","");
+  if (/^[0-9a-fA-F]{3}$/.test(h)) h=h.split("").map(x=>x+x).join("");
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+}
+function luminance(rgb) {
+  const a=rgb.map(v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});
+  return .2126*a[0]+.7152*a[1]+.0722*a[2];
+}
+function contrastRatio(a,b) {
+  const l1=luminance(a),l2=luminance(b); return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+}
+function updateContrast() {
+  const fg=$("#fg").value,bg=$("#bg").value,a=hexToRgb(fg),b=hexToRgb(bg),r=$("#contrastResult");
+  if(!a||!b) { r.innerHTML="<strong>Check the colour values</strong><br>Use a 3- or 6-digit hexadecimal colour."; return; }
+  const ratio=contrastRatio(a,b), v=ratio.toFixed(2);
+  $("#contrastPreview").style.color=fg; $("#contrastPreview").style.backgroundColor=bg;
+  const aaN=ratio>=4.5, aaL=ratio>=3, aaaN=ratio>=7, aaaL=ratio>=4.5;
+  r.innerHTML=`<strong>${v}:1</strong><br>
+    AA normal: ${aaN?"Pass":"Fail"} · AA large: ${aaL?"Pass":"Fail"}<br>
+    AAA normal: ${aaaN?"Pass":"Fail"} · AAA large: ${aaaL?"Pass":"Fail"}`;
+}
+["#fg","#bg"].forEach(s=>$(s).addEventListener("input",updateContrast));
+["#search","#levelFilter","#principleFilter","#statusFilter"].forEach(s=>$(s).addEventListener("input",renderCriteria));
+
+$("#resetBtn").addEventListener("click",()=>{
+  if(confirm("Clear all local checklist ticks?")) {checked.clear();localStorage.removeItem("dgw-checked");renderCriteria();}
+});
+$("#exportBtn").addEventListener("click",()=>{
+  const payload={guide:"Darks Guide To WCAG",standard:"WCAG 2.2",sector:currentSector,checked:[...checked],exported:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="darks-wcag-progress.json"; a.click(); URL.revokeObjectURL(a.href);
+});
+
+renderSectorTabs();renderSectorCopy();renderCriteria();updateContrast();
+</script>
+</body>
+</html>
